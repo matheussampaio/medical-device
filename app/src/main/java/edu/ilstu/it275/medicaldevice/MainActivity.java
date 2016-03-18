@@ -2,6 +2,9 @@ package edu.ilstu.it275.medicaldevice;
 
 import android.content.Context;
 import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbDeviceConnection;
+import android.hardware.usb.UsbEndpoint;
+import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -17,26 +20,31 @@ import java.util.Iterator;
 @EActivity(R.layout.activity_main)
 public class MainActivity extends AppCompatActivity {
 
+    private byte[] bytes;
+    private static int TIMEOUT = 0;
+    private boolean forceClaim = true;
+    private UsbManager mUsbManager;
+    private String COMMAND_DMP = "DMP";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        System.out.println("MainActivity.onCreate");
+       mUsbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-        System.out.println("MainActivity.onResume");
-
-        activate();
     }
 
     @Receiver(actions = "android.hardware.usb.action.USB_DEVICE_ATTACHED")
     protected void USBDeviceAttached() {
         System.out.println("MainActivity.USBDeviceAttached");
+
+        activate();
     }
 
     @Click(R.id.startButton)
@@ -46,24 +54,25 @@ public class MainActivity extends AppCompatActivity {
         activate();
     }
 
-
     private void activate() {
         System.out.println("MainActivity.activate");
 
         System.out.println("Intent action " + getIntent().getAction());
 
-        UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
-
-        HashMap<String, UsbDevice> deviceList = manager.getDeviceList();
+        HashMap<String, UsbDevice> deviceList = mUsbManager.getDeviceList();
 
         Iterator<UsbDevice> deviceIterator = deviceList.values().iterator();
 
-        while(deviceIterator.hasNext()){
+        bytes = COMMAND_DMP.getBytes();
+
+        while(deviceIterator.hasNext()) {
             UsbDevice device = deviceIterator.next();
 
-            System.out.println(device.getDeviceName());
+            UsbInterface intf = device.getInterface(0);
+            UsbEndpoint endpoint = intf.getEndpoint(0);
+            UsbDeviceConnection connection = mUsbManager.openDevice(device);
+            connection.claimInterface(intf, forceClaim);
+            connection.bulkTransfer(endpoint, bytes, bytes.length, TIMEOUT);
         }
     }
-
-
 }
