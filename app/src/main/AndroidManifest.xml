@@ -3,6 +3,7 @@
     package="edu.ilstu.it275.medicaldevice">
 
     <uses-feature android:name="android.hardware.usb.host" />
+    <uses-sdk android:minSdkVersion="12" />
 
     <application
         android:allowBackup="true"

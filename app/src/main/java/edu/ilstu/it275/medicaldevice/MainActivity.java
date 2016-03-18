@@ -20,19 +20,14 @@ import java.util.Iterator;
 @EActivity(R.layout.activity_main)
 public class MainActivity extends AppCompatActivity {
 
-    private byte[] bytes;
-    private static int TIMEOUT = 0;
-    private boolean forceClaim = true;
     private UsbManager mUsbManager;
-    private String COMMAND_DMP = "DMP";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-       mUsbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
-
+        mUsbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
     }
 
     @Override
@@ -48,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Click(R.id.startButton)
-    void startButtonClick(Button button) {
+    void startButtonClick() {
         System.out.println("MainActivity.startButtonClick");
 
         activate();
@@ -63,16 +58,14 @@ public class MainActivity extends AppCompatActivity {
 
         Iterator<UsbDevice> deviceIterator = deviceList.values().iterator();
 
-        bytes = COMMAND_DMP.getBytes();
-
         while(deviceIterator.hasNext()) {
             UsbDevice device = deviceIterator.next();
 
-            UsbInterface intf = device.getInterface(0);
-            UsbEndpoint endpoint = intf.getEndpoint(0);
-            UsbDeviceConnection connection = mUsbManager.openDevice(device);
-            connection.claimInterface(intf, forceClaim);
-            connection.bulkTransfer(endpoint, bytes, bytes.length, TIMEOUT);
+            System.out.println("Vendor id: " + device.getVendorId());
+            System.out.println("Device protocol: " + device.getDeviceProtocol());
+            System.out.println("Product id: " + device.getProductId());
+            System.out.println("Class: " + device.getDeviceClass());
+            System.out.println("Subclass: " + device.getDeviceSubclass());
         }
     }
 }
