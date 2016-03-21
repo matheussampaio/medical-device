@@ -1,4 +1,4 @@
-package edu.ilstu.it275.medicaldevice;
+package com.medicaldevice;
 
 import android.content.Context;
 import android.hardware.usb.UsbDevice;
@@ -6,14 +6,15 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
+import android.hardware.usb.UsbRequest;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.Button;
 
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.Receiver;
 
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -21,6 +22,10 @@ import java.util.Iterator;
 public class MainActivity extends AppCompatActivity {
 
     private UsbManager mUsbManager;
+    private UsbInterface mUsbInterface;
+    private UsbDeviceConnection mConnection;
+    private byte[] COMMAND_DMP = "DMP".getBytes();
+    private UsbEndpoint mEndpoint;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
 
         Iterator<UsbDevice> deviceIterator = deviceList.values().iterator();
 
-        while(deviceIterator.hasNext()) {
+        if (deviceIterator.hasNext()) {
             UsbDevice device = deviceIterator.next();
 
             System.out.println("Vendor id: " + device.getVendorId());
@@ -66,6 +71,24 @@ public class MainActivity extends AppCompatActivity {
             System.out.println("Product id: " + device.getProductId());
             System.out.println("Class: " + device.getDeviceClass());
             System.out.println("Subclass: " + device.getDeviceSubclass());
+
+            mUsbInterface = device.getInterface(0);
+            mEndpoint = mUsbInterface.getEndpoint(0);
+
+            mConnection = mUsbManager.openDevice(device);
+            mConnection.claimInterface(mUsbInterface, true);
+            mConnection.bulkTransfer(mEndpoint, COMMAND_DMP, COMMAND_DMP.length, 10);
+
+            UsbRequest mUsbRequest = new UsbRequest();
+            mUsbRequest.initialize(mConnection, mEndpoint);
+            ByteBuffer command = ByteBuffer.wrap(COMMAND_DMP);
+            mUsbRequest.queue(command, command.capacity());
+
+            UsbRequest usbRequestWait = mConnection.requestWait();
+
+            System.out.println("client data: " + usbRequestWait.getClientData());
+
+            usbRequestWait.close();
         }
     }
 }

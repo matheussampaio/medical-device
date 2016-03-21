@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="edu.ilstu.it275.medicaldevice">
+    package="com.medicaldevice">
 
     <uses-feature android:name="android.hardware.usb.host" />
     <uses-sdk android:minSdkVersion="12" />

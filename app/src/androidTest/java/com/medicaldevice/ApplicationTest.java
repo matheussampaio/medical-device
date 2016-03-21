@@ -1,4 +1,4 @@
-package edu.ilstu.it275.medicaldevice;
+package com.medicaldevice;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
