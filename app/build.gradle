@@ -34,4 +34,5 @@ dependencies {
 
     compile 'org.androidannotations:androidannotations-api:4.0.0'
     compile 'com.android.support:appcompat-v7:23.2.1'
+    compile 'commons-codec:commons-codec:1.5'
 }

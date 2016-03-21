@@ -11,4 +11,3 @@ adb tcpip 5555
 adb connect "$ip_addrs:5555"
 
 echo "you can remove the cable now."
-echo "try `$ pidcat com.medicaldevice`"

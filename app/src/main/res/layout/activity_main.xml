@@ -9,9 +9,81 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="edu.ilstu.it275.medicaldevice.MainActivity">
 
-    <Button
+    <RelativeLayout
+        android:id="@+id/commandsContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/initBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="INIT" />
+
+        <Button
+            android:id="@+id/closeBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CLOSE"
+            android:visibility="invisible" />
+
+        <Button
+            android:id="@+id/dmsBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/closeBtn"
+            android:text="DMS"
+            android:visibility="invisible" />
+
+        <Button
+            android:id="@+id/dmatBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/dmsBtn"
+            android:text="DM@"
+            android:visibility="invisible" />
+
+        <Button
+            android:id="@+id/dmfBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/dmatBtn"
+            android:text="DMF"
+            android:visibility="invisible" />
+
+        <Button
+            android:id="@+id/dmquestionBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/closeBtn"
+            android:text="DM?"
+            android:visibility="invisible" />
+
+        <Button
+            android:id="@+id/dmpBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/dmsBtn"
+            android:layout_toRightOf="@+id/dmquestionBtn"
+            android:text="DMP"
+            android:visibility="invisible" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/outputContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/startButton"
-        android:text="Start"/>
+        android:layout_below="@+id/commandsContainer"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/outputTxtView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="abc" />
+
+    </RelativeLayout>
+
+
 </RelativeLayout>

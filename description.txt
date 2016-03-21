@@ -1,0 +1,14 @@
+0   bLength             18
+1   bDescriptorType     1
+2   bcdUSB              2 0
+4   bDeviceClass        0
+5   bDeviceSubClass     0
+6   bProtocol           0
+7   bMaxPacketSize      64
+8   idVendor            6 123
+10  idProduct           35 3
+12  bcdDevice           3 0
+14  iManufacturer       1
+15  iProduct            2
+16  iSerialNumber       0
+17  bNumConfigurations  1
