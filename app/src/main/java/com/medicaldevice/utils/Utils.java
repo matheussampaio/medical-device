@@ -1,4 +1,4 @@
-package com.medicaldevice;
+package com.medicaldevice.utils;
 
 import org.apache.commons.codec.binary.BinaryCodec;
 
@@ -21,13 +21,22 @@ public class Utils {
     final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
 
     public static String bytesToHexString(byte[] bytes) {
-        char[] hexChars = new char[bytes.length * 3];
+        return bytesToHexString(bytes, false);
+    }
+
+    public static String bytesToHexString(byte[] bytes, boolean withSpace) {
+        int mult = withSpace ? 3 : 2;
+
+        char[] hexChars = new char[bytes.length * mult];
 
         for (int j = 0; j < bytes.length; j++ ) {
             int v = bytes[j] & 0xFF;
-            hexChars[j * 3] = hexArray[v >>> 4];
-            hexChars[j * 3 + 1] = hexArray[v & 0x0F];
-            hexChars[j * 3 + 2] = ' ';
+            hexChars[j * mult] = hexArray[v >>> 4];
+            hexChars[j * mult + 1] = hexArray[v & 0x0F];
+
+            if (withSpace) {
+                hexChars[j * mult + 2] = ' ';
+            }
         }
 
         return new String(hexChars);

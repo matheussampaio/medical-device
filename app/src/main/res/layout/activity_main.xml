@@ -7,7 +7,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="edu.ilstu.it275.medicaldevice.MainActivity">
+    tools:context="com.medicaldevice.screen.MainActivity">
 
     <RelativeLayout
         android:id="@+id/commandsContainer"
@@ -81,7 +81,7 @@
             android:id="@+id/outputTxtView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="abc" />
+            android:text="" />
 
     </RelativeLayout>
 
