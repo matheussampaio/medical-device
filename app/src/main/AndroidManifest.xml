@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.medicaldevice">
+    package="com.orm.SugarApp">
+
+    <meta-data android:name="DATABASE" android:value="medical_device.db" />
+    <meta-data android:name="VERSION" android:value="1" />
+    <!--<meta-data android:name="QUERY_LOG" android:value="true" />-->
+    <meta-data android:name="DOMAIN_PACKAGE_NAME" android:value="com.medicaldevice" />
 
     <uses-feature android:name="android.hardware.usb.host" />
     <uses-sdk android:minSdkVersion="12" />
