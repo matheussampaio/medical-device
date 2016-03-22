@@ -1,11 +1,17 @@
 package com.medicaldevice.screen;
 
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.medicaldevice.R;
 import com.medicaldevice.event.ByteReceivedEvent;
@@ -24,11 +30,17 @@ import org.androidannotations.annotations.ViewById;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.HashMap;
+import java.util.Iterator;
+
 @EActivity(R.layout.activity_main)
 public class MainActivity extends AppCompatActivity {
 
     @ViewById(R.id.outputTxtView)
     TextView mOutputTextView;
+
+    @ViewById(R.id.permissionBtn)
+    Button mPermissionButton;
 
     @ViewById(R.id.initBtn)
     Button mInitButton;
@@ -51,15 +63,19 @@ public class MainActivity extends AppCompatActivity {
     @ViewById(R.id.dmpBtn)
     Button mDmpButton;
 
+    private static final String ACTION_USB_PERMISSION = "com.medicaldevice.USB_PERMISSION";
     private final String TAG = "MEDICAL_DEVICE";
 
     @Bean
     OneTouchUltra2 mOneTouchUltra2;
+    private UsbManager mUsbManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mUsbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
     }
 
     @Override
@@ -69,7 +85,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+
+        checkPermissionButton();
+    }
+
+    @Override
     public void onStop() {
+        mOneTouchUltra2.close();
         EventBus.getDefault().unregister(this);
         super.onStop();
     }
@@ -78,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
     void USBDeviceAttached() {
         Log.d(TAG, "MainActivity.USBDeviceAttached");
 
-        mOneTouchUltra2.init();
+        requestPermission();
     }
 
     @Receiver(actions = "android.hardware.usb.action.USB_DEVICE_DETACHED")
@@ -88,11 +112,25 @@ public class MainActivity extends AppCompatActivity {
         mOneTouchUltra2.close();
     }
 
+    @Receiver(actions = ACTION_USB_PERMISSION)
+    void USBPermission() {
+        Log.d(TAG, "MainActivity.USBPermission");
+
+        checkPermissionButton();
+    }
+
+    @Click(R.id.permissionBtn)
+    void permissionButtonClick() {
+        Log.d(TAG, "MainActivity.permissionButtonClick");
+
+        requestPermission();
+    }
+
     @Click(R.id.initBtn)
     void initButtonClick() {
         Log.d(TAG, "MainActivity.initButtonClick");
 
-        mOneTouchUltra2.init();
+        mOneTouchUltra2.init(getDevice());
     }
 
     @Click(R.id.closeBtn)
@@ -135,6 +173,24 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "MainActivity.dmquestionButtonClick");
 
         mOneTouchUltra2.DMQuestionCommand();
+    }
+
+    @UiThread
+    void showPemissionButton(boolean show) {
+        if (show) {
+            mPermissionButton.setVisibility(View.VISIBLE);
+        } else {
+            mPermissionButton.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    @UiThread
+    void showInitButton(boolean show) {
+        if (show) {
+            mInitButton.setVisibility(View.VISIBLE);
+        } else {
+            mInitButton.setVisibility(View.INVISIBLE);
+        }
     }
 
     @UiThread
@@ -182,6 +238,7 @@ public class MainActivity extends AppCompatActivity {
             showCommands();
 
             mInitButton.setVisibility(View.INVISIBLE);
+            mPermissionButton.setVisibility(View.INVISIBLE);
             mCloseButton.setVisibility(View.VISIBLE);
         }
     }
@@ -191,14 +248,16 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "MainActivity.onCloseEvent");
 
         if (event.getResult()) {
-            mInitButton.setVisibility(View.VISIBLE);
             mCloseButton.setVisibility(View.INVISIBLE);
 
+            checkPermissionButton();
             hideCommands();
 
             mOutputTextView.setText("");
         }
     }
+
+
 
     @Subscribe
     public void onCommandStartEvent(CommandStartEvent event) {
@@ -206,6 +265,52 @@ public class MainActivity extends AppCompatActivity {
 
         clearOutputView();
         appendOutputView(event.getCommand() + "\n");
+    }
+
+    private void requestPermission() {
+        PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
+
+        UsbDevice device = getDevice();
+
+        if (device != null) {
+            mUsbManager.requestPermission(device, permissionIntent);
+        }
+    }
+
+    private UsbDevice getDevice() {
+        Log.d(TAG, "MainActivity.getDevice");
+
+        HashMap<String, UsbDevice> deviceList = mUsbManager.getDeviceList();
+
+        Iterator<UsbDevice> deviceIterator = deviceList.values().iterator();
+
+        if (deviceIterator.hasNext()) {
+            return deviceIterator.next();
+        }
+
+        Toast.makeText(this, "No device attached.", Toast.LENGTH_SHORT).show();
+
+        return null;
+    }
+
+    private boolean hasDevicePermission() {
+        UsbDevice device = getDevice();
+
+        if (device != null) {
+            return mUsbManager.hasPermission(device);
+        }
+
+        return false;
+    }
+
+    private void checkPermissionButton() {
+        if (hasDevicePermission()) {
+            showInitButton(true);
+            showPemissionButton(false);
+        } else {
+            showInitButton(false);
+            showPemissionButton(true);
+        }
     }
 
 }

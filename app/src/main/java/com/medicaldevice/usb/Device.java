@@ -18,9 +18,6 @@ import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.EBean;
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.HashMap;
-import java.util.Iterator;
-
 
 @EBean
 public class Device {
@@ -53,6 +50,7 @@ public class Device {
     private static final int UART_CTS = 0x80;
 
     private final String TAG = "Device";
+    private final Context mContext;
 
     private UsbDevice mDevice;
     private UsbInterface mUsbInterface;
@@ -63,19 +61,25 @@ public class Device {
     private UsbManager mUsbManager;
 
     public Device(Context context) {
+        mContext = context;
         mUsbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
     }
 
-    public boolean init() {
+    public boolean init(UsbDevice device) {
         Log.d(TAG, "Device.init");
 
-        mDevice = getDevice();
+        mDevice = device;
 
         if (mDevice == null) {
-            Log.d(TAG, "Getting device failed");
-            EventBus.getDefault().post(new InitEvent(false, "Getting device failed"));
+            Log.d(TAG, "Getting device failed.");
+            EventBus.getDefault().post(new InitEvent(false, "Getting device failed."));
+            return false;
+        } else if (!mUsbManager.hasPermission(mDevice)) {
+            Log.d(TAG, "Don't have permission.");
+            EventBus.getDefault().post(new InitEvent(false, "Don' have permission."));
             return false;
         }
+
 
         Log.d(TAG, "Device Name: " + mDevice.getDeviceName());
         Log.d(TAG, "VendorID: " + mDevice.getVendorId());
@@ -185,26 +189,12 @@ public class Device {
             mConnection.close();
 
             mConnection = null;
-
-            EventBus.getDefault().post(new CloseEvent(true));
-        } else {
-            EventBus.getDefault().post(new CloseEvent(false));
-        }
-    }
-
-    private UsbDevice getDevice() {
-        Log.d(TAG, "Device.getDevice");
-
-        HashMap<String, UsbDevice> deviceList = mUsbManager.getDeviceList();
-
-        Iterator<UsbDevice> deviceIterator = deviceList.values().iterator();
-
-        if (deviceIterator.hasNext()) {
-            return deviceIterator.next();
         }
 
-        return null;
+        EventBus.getDefault().post(new CloseEvent(true));
     }
+
+
 
     private int sendBulkTransfer(int id, UsbEndpoint endpoint, byte[] buffer, int length, int timeout) {
         Log.d(TAG, "Device.sendBulkTransfer");
