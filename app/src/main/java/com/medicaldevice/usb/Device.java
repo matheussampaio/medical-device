@@ -11,10 +11,8 @@ import android.util.Log;
 
 import com.medicaldevice.event.ByteReceivedEvent;
 import com.medicaldevice.event.CloseEvent;
-import com.medicaldevice.event.DataReceivedEvent;
 import com.medicaldevice.event.InitEvent;
 import com.medicaldevice.utils.Utils;
-
 
 import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.EBean;
@@ -52,7 +50,7 @@ public class Device {
     private static final int UART_CTS = 0x80;
 
     private final String TAG = "Device";
-    private final Context mContext;
+    protected final Context mContext;
 
     private UsbDevice mDevice;
     private UsbInterface mUsbInterface;

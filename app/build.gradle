@@ -37,5 +37,4 @@ dependencies {
     compile 'commons-codec:commons-codec:1.5'
     compile 'org.greenrobot:eventbus:3.0.0'
     compile 'com.github.satyan:sugar:1.4'
-    compile 'joda-time:joda-time:2.9.2'
 }

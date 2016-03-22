@@ -2,6 +2,7 @@ package com.medicaldevice.usb;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.medicaldevice.event.ByteReceivedEvent;
 import com.medicaldevice.event.CommandStartEvent;
@@ -19,9 +20,7 @@ public class OneTouchUltra2 extends Device {
 
     private static final String TAG = "OneTouchUltra2";
 
-
-    private ArrayList<Byte> bytesReceived = new ArrayList<Byte>();
-    private int receivedBytes = 0;
+    private ArrayList<Byte> arrayBytesReceived = new ArrayList<Byte>();
     private String lastCommand;
     private String strLines = "";
     private int lines = 0;
@@ -32,6 +31,10 @@ public class OneTouchUltra2 extends Device {
 
     public void sendDMPCommand() {
         String[] commandHexStringArray = {"0x11", "0x0D", "0x44", "0x4D", "0x50"};
+
+        arrayBytesReceived.clear();
+        lines = 0;
+        strLines = "";
 
         sendCommand("DMP", commandHexStringArray);
     }
@@ -48,7 +51,7 @@ public class OneTouchUltra2 extends Device {
         sendCommand("DM@", commandHexStringArray);
     }
 
-    public void DMQuestionCommand() {
+    public void sendDMQuestionCommand() {
         String[] commandHexStringArray = {"0x11", "0x0D", "0x44", "0x4D", "0x3F"};
 
         sendCommand("DM?", commandHexStringArray);
@@ -83,18 +86,36 @@ public class OneTouchUltra2 extends Device {
         Log.d(TAG, "MainActivity.onByteReceivedEvent :: bytes = [" + Utils.bytesToHexString(event.getByte()) + "]");
 
         if (lastCommand.equals("DMP")) {
-            receivedBytes++;
-            bytesReceived.add(event.getByte());
+            handleCommandDMP(event);
+        } else {
+            String data = Utils.bytesToHexString(event.getByte(), true);
+            EventBus.getDefault().post(new DataReceivedEvent(data));
+        }
+    }
 
-            if (receivedBytes > 2 && receivedBytes <= 5) {
-                strLines += Utils.bytesToHexString(event.getByte());
-            } else if (receivedBytes == 6) {
-                lines = Integer.parseInt(Utils.hexToString(strLines));
+    // TODO: Can be refactored.
+    private void handleCommandDMP(ByteReceivedEvent event) {
+        Log.d(TAG, "OneTouchUltra2.handleCommandDMP");
+        arrayBytesReceived.add(event.getByte());
+
+        int index = arrayBytesReceived.size();
+
+        if (index > 2 && index <= 5) {
+            strLines += Utils.bytesToHexString(event.getByte());
+        } else if (index == 6) {
+            lines = Integer.parseInt(Utils.hexToString(strLines), 10);
+        }
+
+        if (index == (33 + (61 * lines))) {
+            byte[] bytes = new byte[arrayBytesReceived.size()];
+
+            for (int i = 0; i < arrayBytesReceived.size(); i++) {
+                bytes[i] = arrayBytesReceived.get(i);
             }
 
-            if (receivedBytes == (33 + (61 * lines))) {
-                EventBus.getDefault().post(new DataReceivedEvent(bytesReceived));
-            }
+            String data = new String(bytes);
+
+            EventBus.getDefault().post(new DataReceivedEvent(data));
         }
     }
 }

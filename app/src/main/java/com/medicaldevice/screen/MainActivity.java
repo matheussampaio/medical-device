@@ -19,7 +19,6 @@ import com.medicaldevice.event.CommandStartEvent;
 import com.medicaldevice.event.DataReceivedEvent;
 import com.medicaldevice.event.InitEvent;
 import com.medicaldevice.usb.OneTouchUltra2;
-import com.medicaldevice.utils.Utils;
 
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.Click;
@@ -30,7 +29,6 @@ import org.androidannotations.annotations.ViewById;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -175,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
     void dmquestionButtonClick() {
         Log.d(TAG, "MainActivity.dmquestionButtonClick");
 
-        mOneTouchUltra2.DMQuestionCommand();
+        mOneTouchUltra2.sendDMQuestionCommand();
     }
 
     @UiThread
@@ -314,15 +312,18 @@ public class MainActivity extends AppCompatActivity {
     public void onDataReceivedEvent(DataReceivedEvent event) {
         Log.d(TAG, "MainActivity.onDataReceivedEvent");
 
-        ArrayList<Byte> receivedBytes = event.getBytesReceived();
-        byte[] bytes = new byte[receivedBytes.size()];
+//        ArrayList<Byte> receivedBytes = event.getBytesReceived();
+//
+//        byte[] bytes = new byte[receivedBytes.size()];
+//
+//        for (int i = 0; i < receivedBytes.size(); i++) {
+//            bytes[i] = receivedBytes.get(i);
+//        }
+//
+//        String output = new String(bytes);
 
-        for (int i = 0; i < receivedBytes.size(); i++) {
-            bytes[i] = receivedBytes.get(i);
-        }
-
-        String hexString = Utils.bytesToHexString(bytes);
-        System.out.println("hexString = " + hexString);
+        appendOutputView(event.getData());
+//        Log.d(TAG, output.replaceAll("\\n+", ""));
     }
 
 }
