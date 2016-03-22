@@ -14,9 +14,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.medicaldevice.R;
-import com.medicaldevice.event.ByteReceivedEvent;
 import com.medicaldevice.event.CloseEvent;
 import com.medicaldevice.event.CommandStartEvent;
+import com.medicaldevice.event.DataReceivedEvent;
 import com.medicaldevice.event.InitEvent;
 import com.medicaldevice.usb.OneTouchUltra2;
 import com.medicaldevice.utils.Utils;
@@ -30,6 +30,7 @@ import org.androidannotations.annotations.ViewById;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -82,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         EventBus.getDefault().register(this);
+        mOneTouchUltra2.register();
     }
 
     @Override
@@ -95,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
     public void onStop() {
         mOneTouchUltra2.close();
         EventBus.getDefault().unregister(this);
+        mOneTouchUltra2.unregister();
         super.onStop();
     }
 
@@ -223,12 +226,6 @@ public class MainActivity extends AppCompatActivity {
         mOutputTextView.append(text);
     }
 
-    @Subscribe
-    public void onByteReceivedEvent(ByteReceivedEvent event) {
-        Log.d(TAG, "MainActivity.onByteReceivedEvent :: bytes = [" + Utils.bytesToHexString(event.getBytes()) + "]");
-
-        appendOutputView(Utils.bytesToHexString(event.getBytes()) + " ");
-    }
 
     @Subscribe
     public void onInitEvent(InitEvent event) {
@@ -311,6 +308,21 @@ public class MainActivity extends AppCompatActivity {
             showInitButton(false);
             showPemissionButton(true);
         }
+    }
+
+    @Subscribe
+    public void onDataReceivedEvent(DataReceivedEvent event) {
+        Log.d(TAG, "MainActivity.onDataReceivedEvent");
+
+        ArrayList<Byte> receivedBytes = event.getBytesReceived();
+        byte[] bytes = new byte[receivedBytes.size()];
+
+        for (int i = 0; i < receivedBytes.size(); i++) {
+            bytes[i] = receivedBytes.get(i);
+        }
+
+        String hexString = Utils.bytesToHexString(bytes);
+        System.out.println("hexString = " + hexString);
     }
 
 }

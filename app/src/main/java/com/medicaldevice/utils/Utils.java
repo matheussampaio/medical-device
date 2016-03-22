@@ -20,6 +20,18 @@ public class Utils {
 
     final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
 
+    public static String bytesToHexString(byte b) {
+        return bytesToHexString(b, false);
+    }
+
+    public static String bytesToHexString(byte b, boolean withSpace) {
+        byte[] bytes = new byte[1];
+
+        bytes[0] = b;
+
+        return bytesToHexString(bytes, withSpace);
+    }
+
     public static String bytesToHexString(byte[] bytes) {
         return bytesToHexString(bytes, false);
     }
@@ -40,6 +52,19 @@ public class Utils {
         }
 
         return new String(hexChars);
+    }
+
+    public static String hexToString(String hexString) {
+        StringBuilder output = new StringBuilder();
+
+        hexString = hexString.replaceAll("\\s+", "");
+
+        for (int i = 0; i < hexString.length(); i += 2) {
+            String str = hexString.substring(i, i + 2);
+            output.append((char) Integer.parseInt(str, 16));
+        }
+
+        return output.toString();
     }
 
 }

@@ -1,19 +1,13 @@
 package com.medicaldevice.event;
 
 public class ByteReceivedEvent {
-    public final byte[] mBytes;
-
-    public ByteReceivedEvent(byte[] bytes) {
-        mBytes = bytes;
-    }
+    private final byte mByte;
 
     public ByteReceivedEvent(byte b) {
-        mBytes = new byte[1];
-
-        mBytes[0] = b;
+        mByte = b;
     }
 
-    public byte[] getBytes() {
-        return mBytes;
+    public byte getByte() {
+        return mByte;
     }
 }
