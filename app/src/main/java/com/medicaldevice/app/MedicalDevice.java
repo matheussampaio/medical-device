@@ -1,23 +1,21 @@
 package com.medicaldevice.app;
 
-import com.orhanobut.logger.Logger;
 import com.orm.SugarApp;
+import com.squareup.leakcanary.LeakCanary;
 
 import org.androidannotations.annotations.EApplication;
 
 @EApplication
 public class MedicalDevice extends SugarApp {
 
-    public static final String MEDICAL_DEVICE = "MEDICAL-DEVICE";
-
     @Override
     public void onCreate() {
         super.onCreate();
 
-        initLogger();
+        initMemoryLeakAnalyse();
     }
 
-    private void initLogger() {
-        Logger.init(MEDICAL_DEVICE);
+    private void initMemoryLeakAnalyse() {
+        LeakCanary.install(this);
     }
 }

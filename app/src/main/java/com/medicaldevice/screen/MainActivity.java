@@ -18,7 +18,7 @@ import com.medicaldevice.event.CommandStartEvent;
 import com.medicaldevice.event.DataReceivedEvent;
 import com.medicaldevice.event.InitEvent;
 import com.medicaldevice.usb.OneTouchUltra2;
-import com.orhanobut.logger.Logger;
+import com.medicaldevice.utils.Logger;
 
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.Click;

@@ -2,11 +2,12 @@ package com.medicaldevice.usb;
 
 import android.content.Context;
 
+import com.google.common.primitives.Bytes;
 import com.medicaldevice.event.ByteReceivedEvent;
 import com.medicaldevice.event.CommandStartEvent;
 import com.medicaldevice.event.DataReceivedEvent;
+import com.medicaldevice.utils.Logger;
 import com.medicaldevice.utils.Utils;
-import com.orhanobut.logger.Logger;
 
 import org.androidannotations.annotations.EBean;
 import org.greenrobot.eventbus.EventBus;
@@ -118,13 +119,7 @@ public class OneTouchUltra2 extends Device {
         }
 
         if (index == (33 + (61 * lines))) {
-            byte[] bytes = new byte[arrayBytesReceived.size()];
-
-            for (int i = 0; i < arrayBytesReceived.size(); i++) {
-                bytes[i] = arrayBytesReceived.get(i);
-            }
-
-            String data = new String(bytes);
+            String data = new String(Bytes.toArray(arrayBytesReceived));
 
             EventBus.getDefault().post(new DataReceivedEvent(data));
         }

@@ -12,8 +12,8 @@ import android.util.Log;
 import com.medicaldevice.event.ByteReceivedEvent;
 import com.medicaldevice.event.CloseEvent;
 import com.medicaldevice.event.InitEvent;
+import com.medicaldevice.utils.Logger;
 import com.medicaldevice.utils.Utils;
-import com.orhanobut.logger.Logger;
 
 import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.EBean;
