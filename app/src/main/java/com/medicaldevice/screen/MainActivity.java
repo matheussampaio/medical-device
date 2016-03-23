@@ -312,18 +312,25 @@ public class MainActivity extends AppCompatActivity {
     public void onDataReceivedEvent(DataReceivedEvent event) {
         Logger.d(TAG, "MainActivity.onDataReceivedEvent");
 
-//        ArrayList<Byte> receivedBytes = event.getBytesReceived();
-//
-//        byte[] bytes = new byte[receivedBytes.size()];
-//
-//        for (int i = 0; i < receivedBytes.size(); i++) {
-//            bytes[i] = receivedBytes.get(i);
-//        }
-//
-//        String output = new String(bytes);
+        // FIXME: this call is here for simplicity, but should be handled in OneTouchUltra2.
+        parseData(event.getData());
 
         appendOutputView(event.getData());
-//        Log.d(TAG, output.replaceAll("\\n+", ""));
+    }
+
+    // TODO: parse the data string to OTUData objects and check for new values.
+    public void parseData(String data) {
+        /**
+         * You can use Sugar ORM for database:
+         * http://satyan.github.io/sugar/
+         *
+         * OTUData otu = new OTUData();
+         * otu.glucose = "10";
+         *
+         * otu.save();
+         *
+         * OTUData.find();
+         */
     }
 
 }
