@@ -1,13 +1,12 @@
 package com.medicaldevice.usb;
 
 import android.content.Context;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.medicaldevice.event.ByteReceivedEvent;
 import com.medicaldevice.event.CommandStartEvent;
 import com.medicaldevice.event.DataReceivedEvent;
 import com.medicaldevice.utils.Utils;
+import com.orhanobut.logger.Logger;
 
 import org.androidannotations.annotations.EBean;
 import org.greenrobot.eventbus.EventBus;
@@ -20,7 +19,21 @@ public class OneTouchUltra2 extends Device {
 
     private static final String TAG = "OneTouchUltra2";
 
-    private ArrayList<Byte> arrayBytesReceived = new ArrayList<Byte>();
+    // Commands Ids
+    public static final String COMMAND_DMP = "DMP";
+    public static final String COMMAND_DMF = "DMF";
+    public static final String COMMAND_DMS = "DMS";
+    public static final String COMMAND_DMAT = "DM@";
+    public static final String COMMAND_DMQUESTION = "DM?";
+
+    // Commands Hex Array
+    public static final String[] COMMAND_DMP_DATA = {"0x11", "0x0D", "0x44", "0x4D", "0x50"};
+    public static final String[] COMMAND_DMF_DATA = {"0x11", "0x0D", "0x44", "0x4D", "0x46"};
+    public static final String[] COMMAND_DMAT_DATA = {"0x11", "0x0D", "0x44", "0x4D", "0x40"};
+    public static final String[] COMMAND_DMQUESTION_DATA = {"0x11", "0x0D", "0x44", "0x4D", "0x3F"};
+    public static final String[] COMMAND_DMS_DATA =  {"0x11", "0x0D", "0x44", "0x4D", "0x53", "0x0D", "0x0D"};
+
+    private ArrayList<Byte> arrayBytesReceived = new ArrayList<>();
     private String lastCommand;
     private String strLines = "";
     private int lines = 0;
@@ -30,40 +43,36 @@ public class OneTouchUltra2 extends Device {
     }
 
     public void sendDMPCommand() {
-        String[] commandHexStringArray = {"0x11", "0x0D", "0x44", "0x4D", "0x50"};
-
+        Logger.d(TAG, "OneTouchUltra2.sendDMPCommand");
         arrayBytesReceived.clear();
         lines = 0;
         strLines = "";
 
-        sendCommand("DMP", commandHexStringArray);
+        sendCommand(COMMAND_DMP, COMMAND_DMP_DATA);
     }
 
     public void sendDMFCommand() {
-        String[] commandHexStringArray = {"0x11", "0x0D", "0x44", "0x4D", "0x46"};
-
-        sendCommand("DMF", commandHexStringArray);
+        Logger.d(TAG, "OneTouchUltra2.sendDMFCommand");
+        sendCommand(COMMAND_DMF, COMMAND_DMF_DATA);
     }
 
     public void sendDMATCommand() {
-        String[] commandHexStringArray = {"0x11", "0x0D", "0x44", "0x4D", "0x40"};
-
-        sendCommand("DM@", commandHexStringArray);
+        Logger.d(TAG, "OneTouchUltra2.sendDMATCommand");
+        sendCommand(COMMAND_DMAT, COMMAND_DMAT_DATA);
     }
 
     public void sendDMQuestionCommand() {
-        String[] commandHexStringArray = {"0x11", "0x0D", "0x44", "0x4D", "0x3F"};
-
-        sendCommand("DM?", commandHexStringArray);
+        Logger.d(TAG, "OneTouchUltra2.sendDMQuestionCommand");
+        sendCommand(COMMAND_DMQUESTION, COMMAND_DMQUESTION_DATA);
     }
 
     public void sendDMSCommand() {
-        String[] commandHexStringArray = {"0x11", "0x0D", "0x44", "0x4D", "0x53", "0x0D", "0x0D"};
-
-        sendCommand("DMS", commandHexStringArray);
+        Logger.d(TAG, "OneTouchUltra2.sendDMSCommand");
+        sendCommand(COMMAND_DMS, COMMAND_DMS_DATA);
     }
 
     private void sendCommand(String command, String[] commandHexStringArray) {
+        Logger.d(TAG, "OneTouchUltra2.sendCommand");
         byte[] commandByte = Utils.hexStringToByteArray(commandHexStringArray);
 
         EventBus.getDefault().post(new CommandStartEvent(command));
@@ -74,18 +83,20 @@ public class OneTouchUltra2 extends Device {
     }
 
     public void register() {
+        Logger.d(TAG, "OneTouchUltra2.register");
         EventBus.getDefault().register(this);
     }
 
     public void unregister() {
+        Logger.d(TAG, "OneTouchUltra2.unregister");
         EventBus.getDefault().unregister(this);
     }
 
     @Subscribe
     public void onByteReceivedEvent(ByteReceivedEvent event) {
-        Log.d(TAG, "MainActivity.onByteReceivedEvent :: bytes = [" + Utils.bytesToHexString(event.getByte()) + "]");
+        Logger.d(TAG, "OneTouchUltra2.onByteReceivedEvent :: bytes = [" + Utils.bytesToHexString(event.getByte()) + "]");
 
-        if (lastCommand.equals("DMP")) {
+        if (COMMAND_DMP.equalsIgnoreCase(lastCommand)) {
             handleCommandDMP(event);
         } else {
             String data = Utils.bytesToHexString(event.getByte(), true);
@@ -95,7 +106,7 @@ public class OneTouchUltra2 extends Device {
 
     // TODO: Can be refactored.
     private void handleCommandDMP(ByteReceivedEvent event) {
-        Log.d(TAG, "OneTouchUltra2.handleCommandDMP");
+        Logger.d(TAG, "OneTouchUltra2.handleCommandDMP");
         arrayBytesReceived.add(event.getByte());
 
         int index = arrayBytesReceived.size();

@@ -13,6 +13,7 @@ import com.medicaldevice.event.ByteReceivedEvent;
 import com.medicaldevice.event.CloseEvent;
 import com.medicaldevice.event.InitEvent;
 import com.medicaldevice.utils.Utils;
+import com.orhanobut.logger.Logger;
 
 import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.EBean;
@@ -66,7 +67,7 @@ public class Device {
     }
 
     public boolean init(UsbDevice device) {
-        Log.d(TAG, "Device.init");
+        Logger.d(TAG, "Device.init");
 
         mDevice = device;
 
@@ -81,14 +82,14 @@ public class Device {
         }
 
 
-        Log.d(TAG, "Device Name: " + mDevice.getDeviceName());
-        Log.d(TAG, "VendorID: " + mDevice.getVendorId());
-        Log.d(TAG, "ProductID: " + mDevice.getProductId());
+        Logger.d(TAG, "Device Name: " + mDevice.getDeviceName());
+        Logger.d(TAG, "VendorID: " + mDevice.getVendorId());
+        Logger.d(TAG, "ProductID: " + mDevice.getProductId());
 
         mUsbInterface = mDevice.getInterface(0);
 
         if (mUsbInterface == null) {
-            Log.e(TAG, "Getting interface failed.");
+            Logger.e(TAG, "Getting interface failed.");
             EventBus.getDefault().post(new InitEvent(false, "Getting interface failed."));
             return false;
         }
@@ -96,7 +97,7 @@ public class Device {
         // endpoint addr 0x81 = input interrupt
         mEndpoint0 = mUsbInterface.getEndpoint(0);
         if ((mEndpoint0.getType() != UsbConstants.USB_ENDPOINT_XFER_INT) || (mEndpoint0.getDirection() != UsbConstants.USB_DIR_IN)) {
-            Log.e(TAG, "Getting endpoint 0 (control) failed!");
+            Logger.e(TAG, "Getting endpoint 0 (control) failed!");
             EventBus.getDefault().post(new InitEvent(false, "Getting endpoint 0 (control) failed!"));
             return false;
         }
@@ -104,7 +105,7 @@ public class Device {
         // endpoint addr 0x2 = output bulk
         mEndpoint1 = mUsbInterface.getEndpoint(1);
         if ((mEndpoint1.getType() != UsbConstants.USB_ENDPOINT_XFER_BULK) || (mEndpoint1.getDirection() != UsbConstants.USB_DIR_OUT)) {
-            Log.e(TAG, "Getting endpoint 1 (output) failed!");
+            Logger.e(TAG, "Getting endpoint 1 (output) failed!");
             EventBus.getDefault().post(new InitEvent(false, "Getting endpoint 1 (output) failed!"));
             return false;
         }
@@ -112,20 +113,20 @@ public class Device {
         // endpoint addr 0x83 = input bulk
         mEndpoint2 = mUsbInterface.getEndpoint(2);
         if ((mEndpoint2.getType() != UsbConstants.USB_ENDPOINT_XFER_BULK) || (mEndpoint2.getDirection() != UsbConstants.USB_DIR_IN)) {
-            Log.e(TAG, "Getting endpoint 2 (input) failed!");
+            Logger.e(TAG, "Getting endpoint 2 (input) failed!");
             EventBus.getDefault().post(new InitEvent(false, "Getting endpoint 2 (input) failed!"));
             return false;
         }
 
         mConnection = mUsbManager.openDevice(mDevice);
         if (mConnection == null) {
-            Log.e(TAG, "Getting DeviceConnection failed!");
+            Logger.e(TAG, "Getting DeviceConnection failed!");
             EventBus.getDefault().post(new InitEvent(false, "Getting DeviceConnection failed!"));
             return false;
         }
 
         if (!mConnection.claimInterface(mUsbInterface, true)) {
-            Log.e(TAG, "Exclusive interface access failed!");
+            Logger.e(TAG, "Exclusive interface access failed!");
             EventBus.getDefault().post(new InitEvent(false, "Exclusive interface access failed!"));
             return false;
         }
@@ -182,7 +183,7 @@ public class Device {
     }
 
     public void close() {
-        Log.d(TAG, "Device.close");
+        Logger.d(TAG, "Device.close");
 
         if (mConnection != null) {
             mConnection.releaseInterface(mUsbInterface);
@@ -197,18 +198,18 @@ public class Device {
 
 
     private int sendBulkTransfer(int id, UsbEndpoint endpoint, byte[] buffer, int length, int timeout) {
-        Log.d(TAG, "Device.sendBulkTransfer");
+        Logger.d(TAG, "Device.sendBulkTransfer");
 
         int result = mConnection.bulkTransfer(endpoint, buffer, length, timeout);
 
         if (result < 0) {
-            Log.e(TAG, String.format("bulkTransfer %d failed!", id));
+            Logger.e(TAG, String.format("bulkTransfer %d failed!", id));
         } else {
-            Log.i(TAG, String.format("bulkTransfer %d :: result = %d", id, result));
+            Logger.i(TAG, String.format("bulkTransfer %d :: result = %d", id, result));
         }
 
         if (buffer != null) {
-            Log.d(TAG, "Utils.bytesToBinaryString(buffer) = " + Utils.bytesToBinaryString(buffer));
+            Logger.d(TAG, "Utils.bytesToBinaryString(buffer) = " + Utils.bytesToBinaryString(buffer));
         }
 
         return result;
@@ -220,19 +221,19 @@ public class Device {
         int result = mConnection.controlTransfer(vendorReadRequestType, vendorReadRequest, value, index, buffer, length, timeout);
 
         if (result < 0) {
-            Log.e(TAG, String.format("controlTransfer %d failed!", id));
+            Logger.e(TAG, String.format("controlTransfer %d failed!", id));
         } else {
-            Log.i(TAG, String.format("controlTransfer %d :: result = %d", id, result));
+            Logger.i(TAG, String.format("controlTransfer %d :: result = %d", id, result));
         }
 
         if (buffer != null) {
-            Log.d(TAG, "Utils.bytesToBinaryString(buffer) = " + Utils.bytesToBinaryString(buffer));
+            Logger.d(TAG, "Utils.bytesToBinaryString(buffer) = " + Utils.bytesToBinaryString(buffer));
         }
     }
 
     @Background
     public void read() {
-        Log.d(TAG, "Device.read");
+        Logger.d(TAG, "Device.read");
 
         byte buffer[] = new byte[mEndpoint2.getMaxPacketSize()];
 
@@ -247,7 +248,7 @@ public class Device {
 
     @Background
     void sendBytes(byte[] bytes) {
-        Log.d(TAG, "Device.sendBytes");
+        Logger.d(TAG, "Device.sendBytes");
         sendBulkTransfer(1, mEndpoint1, bytes, bytes != null ? bytes.length : 0, 100);
     }
 }

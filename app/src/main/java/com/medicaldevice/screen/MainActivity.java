@@ -7,7 +7,6 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -19,6 +18,7 @@ import com.medicaldevice.event.CommandStartEvent;
 import com.medicaldevice.event.DataReceivedEvent;
 import com.medicaldevice.event.InitEvent;
 import com.medicaldevice.usb.OneTouchUltra2;
+import com.orhanobut.logger.Logger;
 
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.Click;
@@ -101,77 +101,77 @@ public class MainActivity extends AppCompatActivity {
 
     @Receiver(actions = "android.hardware.usb.action.USB_DEVICE_ATTACHED")
     void USBDeviceAttached() {
-        Log.d(TAG, "MainActivity.USBDeviceAttached");
+        Logger.d(TAG, "MainActivity.USBDeviceAttached");
 
         requestPermission();
     }
 
     @Receiver(actions = "android.hardware.usb.action.USB_DEVICE_DETACHED")
     void USBDeviceDetached() {
-        Log.d(TAG, "MainActivity.USBDeviceDetached");
+        Logger.d(TAG, "MainActivity.USBDeviceDetached");
 
         mOneTouchUltra2.close();
     }
 
     @Receiver(actions = ACTION_USB_PERMISSION)
     void USBPermission() {
-        Log.d(TAG, "MainActivity.USBPermission");
+        Logger.d(TAG, "MainActivity.USBPermission");
 
         checkPermissionButton();
     }
 
     @Click(R.id.permissionBtn)
     void permissionButtonClick() {
-        Log.d(TAG, "MainActivity.permissionButtonClick");
+        Logger.d(TAG, "MainActivity.permissionButtonClick");
 
         requestPermission();
     }
 
     @Click(R.id.initBtn)
     void initButtonClick() {
-        Log.d(TAG, "MainActivity.initButtonClick");
+        Logger.d(TAG, "MainActivity.initButtonClick");
 
         mOneTouchUltra2.init(getDevice());
     }
 
     @Click(R.id.closeBtn)
     void closeButtonClick() {
-        Log.d(TAG, "MainActivity.closeButtonClick");
+        Logger.d(TAG, "MainActivity.closeButtonClick");
 
         mOneTouchUltra2.close();
     }
 
     @Click(R.id.dmsBtn)
     void dmsButtonClick() {
-        Log.d(TAG, "MainActivity.dmsButtonClick");
+        Logger.d(TAG, "MainActivity.dmsButtonClick");
 
         mOneTouchUltra2.sendDMSCommand();
     }
 
     @Click(R.id.dmpBtn)
     void dmpButtonClick() {
-        Log.d(TAG, "MainActivity.dmpButtonClick");
+        Logger.d(TAG, "MainActivity.dmpButtonClick");
 
         mOneTouchUltra2.sendDMPCommand();
     }
 
     @Click(R.id.dmfBtn)
     void dmfButtonClick() {
-        Log.d(TAG, "MainActivity.dmfButtonClick");
+        Logger.d(TAG, "MainActivity.dmfButtonClick");
 
         mOneTouchUltra2.sendDMFCommand();
     }
 
     @Click(R.id.dmatBtn)
     void dmatButtonClick() {
-        Log.d(TAG, "MainActivity.dmatButtonClick");
+        Logger.d(TAG, "MainActivity.dmatButtonClick");
 
         mOneTouchUltra2.sendDMATCommand();
     }
 
     @Click(R.id.dmquestionBtn)
     void dmquestionButtonClick() {
-        Log.d(TAG, "MainActivity.dmquestionButtonClick");
+        Logger.d(TAG, "MainActivity.dmquestionButtonClick");
 
         mOneTouchUltra2.sendDMQuestionCommand();
     }
@@ -196,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
 
     @UiThread
     void showCommands() {
-        Log.d(TAG, "MainActivity.showCommands");
+        Logger.d(TAG, "MainActivity.showCommands");
         mDmsButton.setVisibility(View.VISIBLE);
         mDmpButton.setVisibility(View.VISIBLE);
         mDmatButton.setVisibility(View.VISIBLE);
@@ -206,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
 
     @UiThread
     void hideCommands() {
-        Log.d(TAG, "MainActivity.hideCommands");
+        Logger.d(TAG, "MainActivity.hideCommands");
         mDmsButton.setVisibility(View.INVISIBLE);
         mDmpButton.setVisibility(View.INVISIBLE);
         mDmatButton.setVisibility(View.INVISIBLE);
@@ -227,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Subscribe
     public void onInitEvent(InitEvent event) {
-        Log.d(TAG, "MainActivity.onInitEvent");
+        Logger.d(TAG, "MainActivity.onInitEvent");
 
         if (event.getResult()) {
             showCommands();
@@ -240,7 +240,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Subscribe
     public void onCloseEvent(CloseEvent event) {
-        Log.d(TAG, "MainActivity.onCloseEvent");
+        Logger.d(TAG, "MainActivity.onCloseEvent");
 
         if (event.getResult()) {
             mCloseButton.setVisibility(View.INVISIBLE);
@@ -256,7 +256,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Subscribe
     public void onCommandStartEvent(CommandStartEvent event) {
-        Log.d(TAG, "MainActivity.onCommandStartEvent");
+        Logger.d(TAG, "MainActivity.onCommandStartEvent");
 
         clearOutputView();
         appendOutputView(event.getCommand() + "\n");
@@ -273,7 +273,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private UsbDevice getDevice() {
-        Log.d(TAG, "MainActivity.getDevice");
+        Logger.d(TAG, "MainActivity.getDevice");
 
         HashMap<String, UsbDevice> deviceList = mUsbManager.getDeviceList();
 
@@ -310,7 +310,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Subscribe
     public void onDataReceivedEvent(DataReceivedEvent event) {
-        Log.d(TAG, "MainActivity.onDataReceivedEvent");
+        Logger.d(TAG, "MainActivity.onDataReceivedEvent");
 
 //        ArrayList<Byte> receivedBytes = event.getBytesReceived();
 //
