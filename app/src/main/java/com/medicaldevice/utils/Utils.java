@@ -2,6 +2,10 @@ package com.medicaldevice.utils;
 
 import org.apache.commons.codec.binary.BinaryCodec;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class Utils {
 
     public static byte[] hexStringToByteArray(String s[]) {
@@ -66,5 +70,16 @@ public class Utils {
 
         return output.toString();
     }
-
+    public static long getDate(String sDate, String sTime){
+        SimpleDateFormat ft =
+                new SimpleDateFormat("mm/dd/yy HH:mm:ss");
+        Date date = null;
+        try {
+            date = ft.parse(sDate+" "+sTime);
+        } catch (ParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return date.getTime();
+    }
 }

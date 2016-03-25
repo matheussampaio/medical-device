@@ -84,11 +84,28 @@
         android:layout_below="@+id/commandsContainer"
         android:padding="8dp">
 
-        <TextView
+        <!--<TextView
             android:id="@+id/outputTxtView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="" />
+            android:text=""
+            android:scrollbars="vertical"
+            />-->
+        <ScrollView
+            android:id="@+id/SCROLLER_ID"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="vertical"
+            android:fillViewport="true">
+
+            <TextView
+                android:id="@+id/outputTxtView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text=""
+                />
+
+        </ScrollView>
 
     </RelativeLayout>
 
