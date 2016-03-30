@@ -105,7 +105,6 @@ public class OneTouchUltra2 extends Device {
         }
     }
 
-    // TODO: Can be refactored.
     private void handleCommandDMP(ByteReceivedEvent event) {
         Logger.d(TAG, "OneTouchUltra2.handleCommandDMP");
         arrayBytesReceived.add(event.getByte());

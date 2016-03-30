@@ -75,6 +75,15 @@
             android:text="DMP"
             android:visibility="invisible" />
 
+        <Button
+            android:id="@+id/dbBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/dmatBtn"
+            android:layout_toRightOf="@+id/dmpBtn"
+            android:text="DB"
+            android:visibility="invisible" />
+
     </RelativeLayout>
 
     <RelativeLayout

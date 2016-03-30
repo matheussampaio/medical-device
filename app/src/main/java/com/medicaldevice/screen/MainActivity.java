@@ -31,10 +31,8 @@ import org.androidannotations.annotations.ViewById;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.StringTokenizer;
 
 @EActivity(R.layout.activity_main)
@@ -66,6 +64,9 @@ public class MainActivity extends AppCompatActivity {
 
     @ViewById(R.id.dmpBtn)
     Button mDmpButton;
+
+    @ViewById(R.id.dbBtn)
+    Button mDbButton;
 
     private static final String ACTION_USB_PERMISSION = "com.medicaldevice.USB_PERMISSION";
     private final String TAG = "MEDICAL_DEVICE";
@@ -177,15 +178,21 @@ public class MainActivity extends AppCompatActivity {
     @Click(R.id.dmquestionBtn)
     void dmquestionButtonClick() {
         Logger.d(TAG, "MainActivity.dmquestionButtonClick");
+
+        mOneTouchUltra2.sendDMQuestionCommand();
+    }
+
+    @Click(R.id.dbBtn)
+    void dbButtonClick() {
+        Logger.d(TAG, "MainActivity.dbButtonClick");
         mOutputTextView.setText("");
-        //mOneTouchUltra2.sendDMQuestionCommand();
         appendOutputView("------- Stored Values ------ \n");
         appendOutputView("  Time        glucose \n");
         appendOutputView("----------------------------- \n");
         Iterator<OTUData> data = OTUData.findAll(OTUData.class);
-        while(data.hasNext()) {
-            OTUData d = (OTUData)data.next();
-            appendOutputView(d.dateTime+"     "+d.glucose+"\n");
+        while (data.hasNext()) {
+            OTUData d = data.next();
+            appendOutputView(d.dateTime + "     " + d.glucose + "\n");
         }
     }
 
@@ -215,6 +222,7 @@ public class MainActivity extends AppCompatActivity {
         mDmatButton.setVisibility(View.VISIBLE);
         mDmquestionButton.setVisibility(View.VISIBLE);
         mDmfButton.setVisibility(View.VISIBLE);
+        mDbButton.setVisibility(View.VISIBLE);
     }
 
     @UiThread
@@ -225,6 +233,7 @@ public class MainActivity extends AppCompatActivity {
         mDmatButton.setVisibility(View.INVISIBLE);
         mDmquestionButton.setVisibility(View.INVISIBLE);
         mDmfButton.setVisibility(View.INVISIBLE);
+        mDbButton.setVisibility(View.INVISIBLE);
     }
 
     @UiThread
@@ -236,7 +245,6 @@ public class MainActivity extends AppCompatActivity {
     void appendOutputView(String text) {
         mOutputTextView.append(text);
     }
-
 
     @Subscribe
     public void onInitEvent(InitEvent event) {
@@ -265,14 +273,22 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
-
     @Subscribe
     public void onCommandStartEvent(CommandStartEvent event) {
         Logger.d(TAG, "MainActivity.onCommandStartEvent");
 
         clearOutputView();
         appendOutputView(event.getCommand() + "\n");
+    }
+
+    @Subscribe
+    public void onDataReceivedEvent(DataReceivedEvent event) {
+        Logger.d(TAG, "MainActivity.onDataReceivedEvent");
+        appendOutputView("----------- RAW Data -------------- \n");
+        appendOutputView(event.getData());
+        appendOutputView("---------- Processed Data --------------- \n");
+        // FIXME: this call is here for simplicity, but should be handled in OneTouchUltra2.
+        parseData(event.getData());
     }
 
     private void requestPermission() {
@@ -304,11 +320,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean hasDevicePermission() {
         UsbDevice device = getDevice();
 
-        if (device != null) {
-            return mUsbManager.hasPermission(device);
-        }
-
-        return false;
+        return device != null && mUsbManager.hasPermission(device);
     }
 
     private void checkPermissionButton() {
@@ -321,86 +333,77 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Subscribe
-    public void onDataReceivedEvent(DataReceivedEvent event) {
-        Logger.d(TAG, "MainActivity.onDataReceivedEvent");
-        appendOutputView("----------- RAW Data -------------- \n");
-        appendOutputView(event.getData());
-        appendOutputView("---------- Processed Data --------------- \n");
-        // FIXME: this call is here for simplicity, but should be handled in OneTouchUltra2.
-        parseData(event.getData());
-    }
+
     // TODO: parse the data string to OTUData objects and check for new values.
     public void parseData(String data) {
 
         boolean header = true;
         int numRecords = 0;
-        int newRecords = 0;
         int index = 0;
         String sDate = "";
-        int recordsCount = new Long(OTUData.count(OTUData.class)).intValue();
-        appendOutputView("Records in DB : "+recordsCount+"\n");
-        List<OTUData> newOTUData = new ArrayList<OTUData>();
-        numRecords = new Integer(data.substring(2, 5)).intValue();
-            StringTokenizer completeString = new StringTokenizer(data, "P");
-            while (completeString.hasMoreTokens()) {
-                if(numRecords<=recordsCount)
-                    break;
-                while (numRecords > recordsCount) {
-                    OTUData meterData = new OTUData();
-                    String row = completeString.nextToken();
-                    row = row.replace("\"", "").trim();
-                    StringTokenizer rowString = new StringTokenizer(row, ",");
-                    while (rowString.hasMoreTokens()) {
-                        String v = rowString.nextToken().trim();
-                        if (!v.isEmpty()) {
-                            if (header) {
-                                if (index == 0) {
-                                    appendOutputView("Records in device : " + numRecords+"\n");
-                                } else if (index == 1) {
-                                    meterData.serial=v;
-                                    appendOutputView("Serial = " + v+"\n");
-                                } else if (index == 2) {
-                                    meterData.unit=v;
-                                    appendOutputView("Units = " + v+"\n");
-                                }
-                            } else {
-                                if (index == 0)
-                                    appendOutputView("Day of the Week = " + v+"\n");
-                                else if (index == 1) {
-                                    sDate = v;
-                                    appendOutputView("Date = " + v+"\n");
-                                } else if (index == 2) {
-                                    appendOutputView("Time = " + v+"\n");
-                                    meterData.dateTime = Utils.getDate(sDate, v);
-                                } else if (index == 3) {
-                                    meterData.glucose = (new Integer(v.replace("*", "").trim()).intValue());
-                                    appendOutputView("Reading = " + v.replace("*", "").trim()+"\n");
-                                } else if (index == 4) {
-                                    appendOutputView("User Flag = " + v.trim()+"\n");
-                                    meterData.userFlag= v;
-                                } else if (index == 5) {
-                                    appendOutputView("Food Code= " + v.trim()+"\n");
-                                    meterData.mealComment = v;
-                                }
-                            }
-                            index++;
-                        }
-                    }
-                    appendOutputView("----------------------------------\n");
-                    if(!header) {
-                        meterData.save();
-                        numRecords--;
-                    }
-                    header = false;
-                    index = 0;
+        int recordsCount = Long.valueOf(OTUData.count(OTUData.class)).intValue();
+        appendOutputView("Records in DB : " + recordsCount + "\n");
+        numRecords = Integer.parseInt(data.substring(2, 5));
+        StringTokenizer completeString = new StringTokenizer(data, "P");
 
+        while (completeString.hasMoreTokens()) {
+            if (numRecords <= recordsCount)
+                break;
+            while (numRecords > recordsCount) {
+                OTUData meterData = new OTUData();
+                String row = completeString.nextToken();
+                row = row.replace("\"", "").trim();
+                StringTokenizer rowString = new StringTokenizer(row, ",");
+                while (rowString.hasMoreTokens()) {
+                    String v = rowString.nextToken().trim();
+                    if (!v.isEmpty()) {
+                        if (header) {
+                            if (index == 0) {
+                                appendOutputView("Records in device : " + numRecords + "\n");
+                            } else if (index == 1) {
+                                meterData.serial = v;
+                                appendOutputView("Serial = " + v + "\n");
+                            } else if (index == 2) {
+                                meterData.unit = v;
+                                appendOutputView("Units = " + v + "\n");
+                            }
+                        } else {
+                            if (index == 0)
+                                appendOutputView("Day of the Week = " + v + "\n");
+                            else if (index == 1) {
+                                sDate = v;
+                                appendOutputView("Date = " + v + "\n");
+                            } else if (index == 2) {
+                                appendOutputView("Time = " + v + "\n");
+                                meterData.dateTime = Utils.getDate(sDate, v);
+                            } else if (index == 3) {
+                                meterData.glucose = (new Integer(v.replace("*", "").trim()).intValue());
+                                appendOutputView("Reading = " + v.replace("*", "").trim() + "\n");
+                            } else if (index == 4) {
+                                appendOutputView("User Flag = " + v.trim() + "\n");
+                                meterData.userFlag = v;
+                            } else if (index == 5) {
+                                appendOutputView("Food Code= " + v.trim() + "\n");
+                                meterData.mealComment = v;
+                            }
+                        }
+                        index++;
+                    }
                 }
+                appendOutputView("----------------------------------\n");
+                if (!header) {
+                    meterData.save();
+                    numRecords--;
+                }
+                header = false;
+                index = 0;
+
             }
+        }
         appendOutputView("\n ----------------------------------\n");
         long count = OTUData.count(OTUData.class);
-        appendOutputView("Total Count - "+count);
-        }
+        appendOutputView("Total Count - " + count);
+    }
 
 
 }
