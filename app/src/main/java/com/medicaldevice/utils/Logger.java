@@ -23,6 +23,9 @@ public class Logger {
     public static void e(String msg) {
         e(TAG, msg);
     }
+    public static void e(String msg, Throwable t) {
+        e(TAG, msg, t);
+    }
 
     public static void e(String tag, String msg) {
         e(tag, msg, null);

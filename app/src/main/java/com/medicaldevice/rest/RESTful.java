@@ -6,15 +6,20 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class RESTful {
 
     private static final String URL_BASE = "http://medical-device-server.herokuapp.com/api/";
-    private final ApiService mRESTful;
+    private static ApiService instance = null;
 
-    private RESTful() {
+    private RESTful() {}
 
-        Retrofit retrofit = new Retrofit.Builder()
-            .baseUrl(URL_BASE)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build();
+    public static ApiService getInstance() {
+        if (instance == null) {
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(URL_BASE)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
 
-         mRESTful = retrofit.create(ApiService.class);
+            instance = retrofit.create(ApiService.class);
+        }
+
+        return instance;
     }
 }

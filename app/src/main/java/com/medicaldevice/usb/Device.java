@@ -198,19 +198,19 @@ public class Device {
 
 
     private int sendBulkTransfer(int id, UsbEndpoint endpoint, byte[] buffer, int length, int timeout) {
-        Logger.d(TAG, "Device.sendBulkTransfer");
+//        Logger.d(TAG, "Device.sendBulkTransfer");
 
         int result = mConnection.bulkTransfer(endpoint, buffer, length, timeout);
 
-        if (result < 0) {
-            Logger.e(TAG, String.format("bulkTransfer %d failed!", id));
-        } else {
-            Logger.i(TAG, String.format("bulkTransfer %d :: result = %d", id, result));
-        }
+//        if (result < 0) {
+//            Logger.e(TAG, String.format("bulkTransfer %d failed!", id));
+//        } else {
+//            Logger.i(TAG, String.format("bulkTransfer %d :: result = %d", id, result));
+//        }
 
-        if (buffer != null) {
-            Logger.d(TAG, "Utils.bytesToBinaryString(buffer) = " + Utils.bytesToBinaryString(buffer));
-        }
+//        if (buffer != null) {
+//            Logger.d(TAG, "Utils.bytesToBinaryString(buffer) = " + Utils.bytesToBinaryString(buffer));
+//        }
 
         return result;
     }

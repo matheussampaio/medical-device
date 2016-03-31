@@ -1,7 +1,8 @@
 package com.medicaldevice.app;
 
 import com.orm.SugarApp;
-import com.squareup.leakcanary.LeakCanary;
+
+import net.danlew.android.joda.JodaTimeAndroid;
 
 import org.androidannotations.annotations.EApplication;
 
@@ -12,10 +13,6 @@ public class MedicalDevice extends SugarApp {
     public void onCreate() {
         super.onCreate();
 
-        initMemoryLeakAnalyse();
-    }
-
-    private void initMemoryLeakAnalyse() {
-        LeakCanary.install(this);
+        JodaTimeAndroid.init(this);
     }
 }
