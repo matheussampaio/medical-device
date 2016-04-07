@@ -1,12 +1,18 @@
 package com.medicaldevice.utils;
 
+import android.nfc.Tag;
+
 import org.apache.commons.codec.binary.BinaryCodec;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import com.medicaldevice.utils.Logger;
+
 
 public class Utils {
+
+    private static final String TAG = "MEDICAL_DEVICE_UTILS";
 
     public static byte[] hexStringToByteArray(String s[]) {
         byte[] bytes = new byte[s.length];
@@ -76,9 +82,8 @@ public class Utils {
         Date date = null;
         try {
             date = ft.parse(sDate+" "+sTime);
-        } catch (ParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        } catch (ParseException exception) {
+            Logger.e(TAG,exception.getStackTrace().toString());
         }
         return date.getTime();
     }

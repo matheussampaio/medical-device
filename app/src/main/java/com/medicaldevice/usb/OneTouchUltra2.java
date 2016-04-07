@@ -1,6 +1,8 @@
 package com.medicaldevice.usb;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 
 import com.google.common.primitives.Bytes;
 import com.medicaldevice.event.ByteReceivedEvent;
@@ -19,6 +21,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,9 +52,11 @@ public class OneTouchUltra2 extends Device {
     private String lastCommand;
     private String strLines = "";
     private int lines = 0;
+    private ConnectivityManager networkConnection;
 
     public OneTouchUltra2(Context context) {
         super(context);
+        networkConnection = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
     public void sendDMPCommand() {
@@ -97,6 +102,13 @@ public class OneTouchUltra2 extends Device {
     public void register() {
         Logger.d(TAG, "OneTouchUltra2.register");
         EventBus.getDefault().register(this);
+        // TODO: Check for previous data for cloud updates
+        /*
+         After Registering, check for any data that was
+         not previously not uploaded on the cloud. First,
+         upload them if network is available.
+          */
+        checkForCloudUpdates();
     }
 
     public void unregister() {
@@ -193,26 +205,56 @@ public class OneTouchUltra2 extends Device {
 
         EventBus.getDefault().post(new DataReceivedEvent(output));
 
-        postEntries(otuEntries);
+        if(isNetworkAvailable())
+            postEntries(otuEntries);
+        else
+            saveEntries(otuEntries);
 
     }
 
-    public void postEntries(ArrayList<OTUData> otuEntries) {
-        for (OTUData otuentrie : otuEntries) {
+    public void postEntries(List<OTUData> otuEntries) {
+        for (final OTUData otuentrie : otuEntries) {
             Call<OTUData> call = RESTful.getInstance().postOTUData(otuentrie);
             call.enqueue(new Callback<OTUData>() {
-
                 @Override
                 public void onResponse(Call<OTUData> call, Response<OTUData> response) {
                     Logger.d(String.format("status: %d", response.code()));
+                    otuentrie.setCloudUpdateFlag(true);
+                    otuentrie.save();
                 }
 
                 @Override
                 public void onFailure(Call<OTUData> call, Throwable t) {
                     Logger.e("failure", t);
+                    otuentrie.save();
                 }
             });
         }
+    }
+
+    public void saveEntries (ArrayList<OTUData> otuEntries) {
+        for (OTUData otuentrie : otuEntries) {
+            otuentrie.save();
+        }
+    }
+    // TODO: Check network availability
+    private boolean isNetworkAvailable() {
+        NetworkInfo activeNetworkInfo = networkConnection.getActiveNetworkInfo();
+        boolean haveConnectedWifi = false;
+        boolean haveConnectedMobile = false;
+
+        if(activeNetworkInfo!=null){
+            if(activeNetworkInfo.getType()==ConnectivityManager.TYPE_WIFI)
+                haveConnectedWifi = true;
+            if (activeNetworkInfo.getType()==ConnectivityManager.TYPE_MOBILE)
+                haveConnectedMobile = true;
+        }
+        return haveConnectedWifi || haveConnectedMobile;
+    }
+
+    public void checkForCloudUpdates(){
+        List<OTUData> otuentries = OTUData.find(OTUData.class, "cloudUpdateFlag = false");
+        postEntries(otuentries);
     }
 
 }

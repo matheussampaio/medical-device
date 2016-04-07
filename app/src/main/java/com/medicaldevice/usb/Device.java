@@ -7,6 +7,7 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
+import android.net.ConnectivityManager;
 import android.util.Log;
 
 import com.medicaldevice.event.ByteReceivedEvent;
@@ -61,11 +62,11 @@ public class Device {
     private UsbDeviceConnection mConnection;
     private UsbManager mUsbManager;
 
+
     public Device(Context context) {
         mContext = context;
         mUsbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
     }
-
     public boolean init(UsbDevice device) {
         Logger.d(TAG, "Device.init");
 

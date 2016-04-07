@@ -3,6 +3,8 @@ package com.medicaldevice.model;
 import com.google.gson.annotations.SerializedName;
 import com.orm.SugarRecord;
 
+import java.util.List;
+
 public class OTUData extends SugarRecord {
 
     @SerializedName("dateTime")
@@ -23,6 +25,9 @@ public class OTUData extends SugarRecord {
     @SerializedName("mealComment")
     public String mealComment;
 
+    @SerializedName("cloudUpdateFlag")
+    public boolean cloudUpdateFlag = false;
+
     public OTUData() {}
 
     public OTUData(long dateTime, int glucose, String serial, String unit, String userFlag, String mealComment) {
@@ -34,10 +39,15 @@ public class OTUData extends SugarRecord {
         this.mealComment = mealComment;
     }
 
+    public void setCloudUpdateFlag(boolean cloudUpdateFlag){
+        this.cloudUpdateFlag = cloudUpdateFlag;
+    }
+
     @Override
     public String toString() {
-        return String.format("DateTime: %d, Glucose: %d, Serial: %s, UserFlag: %s, MealComment: %s", dateTime, glucose, serial, userFlag, mealComment);
+        return String.format("DateTime: %d, Glucose: %d, Serial: %s, UserFlag: %s, MealComment: %s, onCloud:%b", dateTime, glucose, serial, userFlag, mealComment,cloudUpdateFlag);
     }
+
 }
 
 
