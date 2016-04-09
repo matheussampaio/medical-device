@@ -185,12 +185,12 @@ public class MainActivity extends AppCompatActivity {
         Logger.d(TAG, "MainActivity.dbButtonClick");
         mOutputTextView.setText("");
         appendOutputView("------- Stored Values ------ \n");
-        appendOutputView("  Time        glucose \n");
+        appendOutputView("  Time        glucose       onCloud\n");
         appendOutputView("----------------------------- \n");
         Iterator<OTUData> data = OTUData.findAll(OTUData.class);
         while (data.hasNext()) {
             OTUData d = data.next();
-            appendOutputView(d.dateTime + "     " + d.glucose + "\n");
+            appendOutputView(d.dateTime + "     " + d.glucose + "     " + d.cloudUpdateFlag +"\n");
         }
     }
 

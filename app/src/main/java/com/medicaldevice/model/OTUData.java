@@ -26,17 +26,18 @@ public class OTUData extends SugarRecord {
     public String mealComment;
 
     @SerializedName("cloudUpdateFlag")
-    public boolean cloudUpdateFlag = false;
+    public boolean cloudUpdateFlag;
 
     public OTUData() {}
 
-    public OTUData(long dateTime, int glucose, String serial, String unit, String userFlag, String mealComment) {
+    public OTUData(long dateTime, int glucose, String serial, String unit, String userFlag, String mealComment, boolean cloudUpdateFlag ) {
         this.dateTime = dateTime;
         this.glucose = glucose;
         this.serial = serial;
         this.unit = unit;
         this.userFlag = userFlag;
         this.mealComment = mealComment;
+        this.cloudUpdateFlag = cloudUpdateFlag;
     }
 
     public void setCloudUpdateFlag(boolean cloudUpdateFlag){

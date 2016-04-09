@@ -3,6 +3,7 @@ package com.medicaldevice.usb;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.widget.Toast;
 
 import com.google.common.primitives.Bytes;
 import com.medicaldevice.event.ByteReceivedEvent;
@@ -21,6 +22,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -108,6 +110,7 @@ public class OneTouchUltra2 extends Device {
          not previously not uploaded on the cloud. First,
          upload them if network is available.
           */
+        //OTUData.deleteAll(OTUData.class);
         checkForCloudUpdates();
     }
 
@@ -152,7 +155,7 @@ public class OneTouchUltra2 extends Device {
         String[] dataArray = data.split("\n");
         String output = "";
         ArrayList<OTUData> otuEntries = new ArrayList<>();
-
+        ArrayList<Long> oldEntries = checkPreviousEntries();
         String headerRegex = "P (\\d{3}),\"(\\w*)\",\"(.*) \" (.*)";
         String entryRegex = "P \"(\\w{3})\",\"(.*)\",\"(.*)   \",\"  (\\d{3}) \",\"(\\D)\",\"(\\d{2})\"(.*)";
 
@@ -184,9 +187,9 @@ public class OneTouchUltra2 extends Device {
 
                     long dateTime = dt.getMillis() / 1000;
 
-                    OTUData otudata = new OTUData(dateTime, glucose, serial, unit, userFlag, mealComment);
-
-                    otuEntries.add(otudata);
+                    OTUData otudata = new OTUData(dateTime, glucose, serial, unit, userFlag, mealComment,false);
+                    if(!oldEntries.contains(dateTime))
+                        otuEntries.add(otudata);
 
                     output += "----------------\n";
                     output += otudata.toString() + "\n";
@@ -204,12 +207,12 @@ public class OneTouchUltra2 extends Device {
         output += String.format("Total Count: %d\n", otuEntries.size());
 
         EventBus.getDefault().post(new DataReceivedEvent(output));
-
-        if(isNetworkAvailable())
-            postEntries(otuEntries);
-        else
-            saveEntries(otuEntries);
-
+        if(otuEntries.size()!=0) {
+            if (isNetworkAvailable())
+                postEntries(otuEntries);
+            else
+                saveEntries(otuEntries);
+        }
     }
 
     public void postEntries(List<OTUData> otuEntries) {
@@ -239,6 +242,7 @@ public class OneTouchUltra2 extends Device {
     }
     // TODO: Check network availability
     private boolean isNetworkAvailable() {
+        EventBus.getDefault().post(new DataReceivedEvent("Checking Network Connection"));
         NetworkInfo activeNetworkInfo = networkConnection.getActiveNetworkInfo();
         boolean haveConnectedWifi = false;
         boolean haveConnectedMobile = false;
@@ -249,12 +253,28 @@ public class OneTouchUltra2 extends Device {
             if (activeNetworkInfo.getType()==ConnectivityManager.TYPE_MOBILE)
                 haveConnectedMobile = true;
         }
+        EventBus.getDefault().post(new DataReceivedEvent("Connection - "+(haveConnectedWifi || haveConnectedMobile)));
         return haveConnectedWifi || haveConnectedMobile;
     }
 
+    public ArrayList<Long> checkPreviousEntries(){
+        ArrayList<Long> oldEntries = new ArrayList<Long>();
+        Iterator<OTUData> it = OTUData.findAll(OTUData.class);
+        while(it.hasNext()) {
+            oldEntries.add(it.next().dateTime);
+        }
+        EventBus.getDefault().post(new DataReceivedEvent("# previous entries saved - " + oldEntries.size()));
+        return oldEntries;
+    }
+
     public void checkForCloudUpdates(){
-        List<OTUData> otuentries = OTUData.find(OTUData.class, "cloudUpdateFlag = false");
+        // According to SugarRecord, cloudUpdateFlag should be referred as cloud_update_flag for queries
+        // Uppercase letters (cloudUpdateFlag) becomes lowercase with underscore before it, i.e. cloud_update_flag
+        List<OTUData> otuentries = OTUData.find(OTUData.class, "cloud_update_flag = ?","0");
         postEntries(otuentries);
+
+        EventBus.getDefault().post(new DataReceivedEvent("# Entries saved on cloud - " + otuentries.size()));
+
     }
 
 }
