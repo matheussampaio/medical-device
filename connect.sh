@@ -8,6 +8,4 @@ rm addrs.txt
 
 adb tcpip 5555
 
-adb connect "$ip_addrs:5555"
-
-echo "you can remove the cable now."
+adb connect "$ip_addrs:5555" && echo "you can remove the cable now."

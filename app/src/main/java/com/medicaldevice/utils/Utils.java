@@ -1,14 +1,14 @@
 package com.medicaldevice.utils;
 
-import android.nfc.Tag;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 
 import org.apache.commons.codec.binary.BinaryCodec;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import com.medicaldevice.utils.Logger;
-
 
 public class Utils {
 
@@ -86,5 +86,25 @@ public class Utils {
             Logger.e(TAG,exception.getStackTrace().toString());
         }
         return date.getTime();
+    }
+
+    public static boolean isInternetAvailable(Context context) {
+        ConnectivityManager networkConnection = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = networkConnection.getActiveNetworkInfo();
+
+        boolean haveConnectedWifi = false;
+        boolean haveConnectedMobile = false;
+
+        if (activeNetworkInfo != null) {
+            if (activeNetworkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+                haveConnectedWifi = true;
+            }
+
+            if (activeNetworkInfo.getType() == ConnectivityManager.TYPE_MOBILE) {
+                haveConnectedMobile = true;
+            }
+        }
+
+        return haveConnectedWifi || haveConnectedMobile;
     }
 }
