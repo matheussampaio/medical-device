@@ -4,7 +4,9 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <uses-feature android:name="android.hardware.usb.host" />
+
     <uses-sdk android:minSdkVersion="12" />
 
     <application
@@ -20,17 +22,14 @@
         <meta-data android:name="QUERY_LOG" android:value="true" />
         <meta-data android:name="DOMAIN_PACKAGE_NAME" android:value="com.medicaldevice" />
 
-        <activity android:name=".screen.MainActivity_">
+        <activity
+            android:name=".screen.MainActivity_"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <service
-            android:name=".services.DeviceHandlerService_"
-            android:exported="false" >
 
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
@@ -38,7 +37,12 @@
 
             <meta-data android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
                 android:resource="@xml/device_filter" />
+        </activity>
+
+        <service
+            android:name=".services.DeviceHandlerService_">
         </service>
+
     </application>
 
 </manifest>

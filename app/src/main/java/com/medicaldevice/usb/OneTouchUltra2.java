@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.google.common.primitives.Bytes;
 import com.medicaldevice.event.ByteReceivedEvent;
+import com.medicaldevice.event.CommandEndEvent;
 import com.medicaldevice.event.CommandStartEvent;
 import com.medicaldevice.event.DataReceivedEvent;
 import com.medicaldevice.model.OTUData;
@@ -90,12 +91,12 @@ public class OneTouchUltra2 extends Device {
         sendCommand(COMMAND_DMS, COMMAND_DMS_DATA);
     }
 
-    public void register() {
+    private void register() {
         Logger.d(TAG, "OneTouchUltra2::register");
         EventBus.getDefault().register(this);
     }
 
-    public void unregister() {
+    private void unregister() {
         Logger.d(TAG, "OneTouchUltra2::unregister");
         EventBus.getDefault().unregister(this);
     }
@@ -130,13 +131,20 @@ public class OneTouchUltra2 extends Device {
 
     private void sendCommand(String command, String[] commandHexStringArray) {
         Logger.d(TAG, "OneTouchUltra2::sendCommand");
-        byte[] commandByte = Utils.hexStringToByteArray(commandHexStringArray);
 
-        EventBus.getDefault().post(new CommandStartEvent(command));
+        if (isInitialized) {
+            register();
 
-        lastCommand = command;
+            byte[] commandByte = Utils.hexStringToByteArray(commandHexStringArray);
 
-        sendBytes(commandByte);
+            EventBus.getDefault().post(new CommandStartEvent(command));
+
+            lastCommand = command;
+
+            sendBytes(commandByte);
+        } else {
+            Logger.e("OneTouchUltra2 not initialized.");
+        }
     }
 
     private void handleCommandDMP(ByteReceivedEvent event) {
@@ -156,6 +164,10 @@ public class OneTouchUltra2 extends Device {
             List<OTUData> entries = parseData(data);
             saveNewEntriesToDatabase(entries);
             sendEntriesToCloud();
+
+            EventBus.getDefault().post(new CommandEndEvent("DMP"));
+
+            unregister();
         }
     }
 
