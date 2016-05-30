@@ -1,25 +1,28 @@
 package com.medicaldevice.services;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
+import android.support.v4.app.NotificationCompat;
 
+import com.medicaldevice.R;
 import com.medicaldevice.event.CommandEndEvent;
 import com.medicaldevice.event.InitEvent;
+import com.medicaldevice.screen.MainActivity;
 import com.medicaldevice.usb.OneTouchUltra2;
 import com.medicaldevice.utils.Logger;
 
 import org.androidannotations.annotations.Bean;
-import org.androidannotations.annotations.EService;
+import org.androidannotations.annotations.EIntentService;
+import org.androidannotations.annotations.ServiceAction;
 import org.androidannotations.annotations.SystemService;
 import org.androidannotations.api.support.app.AbstractIntentService;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import java.util.HashMap;
-import java.util.Iterator;
-
-@EService
+@EIntentService
 public class DeviceHandlerService extends AbstractIntentService {
 
     @Bean
@@ -28,19 +31,32 @@ public class DeviceHandlerService extends AbstractIntentService {
     @SystemService
     UsbManager mUsbManager;
 
+    @SystemService
+    NotificationManager mNotificationManager;
+
     public DeviceHandlerService() {
         super("DeviceHandlerService");
     }
 
-    @Override
-    protected void onHandleIntent(Intent intent) {
-        Logger.d("DeviceHandlerService::onHandleIntent");
+    @ServiceAction
+    void sync(UsbDevice device) {
+        Logger.d("DeviceHandlerService::sync");
+
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
+
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+            .setContentTitle("Medical Device")
+            .setStyle(new NotificationCompat.BigTextStyle().bigText("Synchronizing data..."))
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentText("Synchronizing data...");
+
+        mBuilder.setContentIntent(contentIntent);
+
+        startForeground(42, mBuilder.build());
 
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this);
         }
-
-        UsbDevice device = getFirstDevice();
 
         mOneTouchUltra2.init(device);
     }
@@ -76,23 +92,5 @@ public class DeviceHandlerService extends AbstractIntentService {
 
         stopSelf();
     }
-
-    private UsbDevice getFirstDevice() {
-        Logger.d("MainActivity::getDevice");
-
-        HashMap<String, UsbDevice> deviceList = mUsbManager.getDeviceList();
-
-        Iterator<UsbDevice> deviceIterator = deviceList.values().iterator();
-
-        UsbDevice device = null;
-
-        if (deviceIterator.hasNext()) {
-            device = deviceIterator.next();
-        }
-
-        return device;
-    }
-
-
 
 }

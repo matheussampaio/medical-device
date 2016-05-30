@@ -54,7 +54,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void sync() {
         Logger.d("MainActivity::sync");
-        DeviceHandlerService_.intent(getApplication())
+
+        DeviceHandlerService_
+            .intent(getApplication())
+            .sync(mDevice)
             .start();
     }
 
