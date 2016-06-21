@@ -1,5 +1,8 @@
 package com.medicaldevice.model;
 
+/**
+ * ENUM class for meal comments
+ */
 public class OTUMealCommentENUM {
     public static final int NO_COMMENT = 0;
     public static final int NOT_ENOUGH_FOOD = 1;

@@ -18,6 +18,9 @@ import org.androidannotations.annotations.SystemService;
 import java.util.HashMap;
 import java.util.Iterator;
 
+/**
+ * Main Activity class
+ */
 @EActivity(R.layout.activity_main)
 public class MainActivity extends AppCompatActivity {
 
@@ -28,6 +31,9 @@ public class MainActivity extends AppCompatActivity {
 
     private UsbDevice mDevice;
 
+    /**
+     * USB device attached event handler
+     */
     @Receiver(actions = "android.hardware.usb.action.USB_DEVICE_ATTACHED")
     void USBDeviceAttached() {
         Logger.d("MainActivity::USBDeviceAttached");
@@ -35,6 +41,9 @@ public class MainActivity extends AppCompatActivity {
         onSyncButtonClick();
     }
 
+    /**
+     * On sync button click event handler
+     */
     @Click(R.id.syncBtn)
     void onSyncButtonClick() {
         Logger.d("MainActivity::onSyncButtonClick");
@@ -52,6 +61,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Synchronize data
+     */
     private void sync() {
         Logger.d("MainActivity::sync");
 
@@ -61,11 +73,17 @@ public class MainActivity extends AppCompatActivity {
             .start();
     }
 
+    /**
+     * USB device detached event handler
+     */
     @Receiver(actions = "android.hardware.usb.action.USB_DEVICE_DETACHED")
     void USBDeviceDetached() {
         Logger.d("MainActivity::USBDeviceDetached");
     }
 
+    /**
+     * USB permission request event handler
+     */
     @Receiver(actions = ACTION_USB_PERMISSION)
     void USBPermission() {
         Logger.d("MainActivity::USBPermission");
@@ -79,11 +97,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Check if has permission to access device
+     *
+     * @return true if has false if not
+     */
     private boolean hasPermission() {
         Logger.d("MainActivity::hasPermission");
         return mDevice != null && mUsbManager.hasPermission(mDevice);
     }
 
+    /**
+     * Request user permission to access device
+     */
     private void requestPermission() {
         Logger.d("MainActivity::requestPermission");
 
@@ -92,6 +118,11 @@ public class MainActivity extends AppCompatActivity {
         mUsbManager.requestPermission(mDevice, permissionIntent);
     }
 
+    /**
+     * Get first device
+     *
+     * @return first device
+     */
     private UsbDevice getFirstDevice() {
         Logger.d("MainActivity::getDevice");
 

@@ -6,14 +6,19 @@ import android.net.NetworkInfo;
 
 import org.apache.commons.codec.binary.BinaryCodec;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
+/**
+ * Utils
+ */
 public class Utils {
 
     private static final String TAG = "MEDICAL_DEVICE_UTILS";
+    final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
 
+    /**
+     * Convert hex string array to byte array.
+     * @param s Hex string array.
+     * @return Byte array.
+     */
     public static byte[] hexStringToByteArray(String s[]) {
         byte[] bytes = new byte[s.length];
 
@@ -24,16 +29,30 @@ public class Utils {
         return bytes;
     }
 
+    /**
+     * Convert bytes array to binary string.
+     * @param bytes Byte array.
+     * @return Binary string.
+     */
     public static String bytesToBinaryString(byte[] bytes) {
         return BinaryCodec.toAsciiString(bytes);
     }
 
-    final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
-
+    /**
+     * Convert byte to hex string.
+     * @param b Bytes.
+     * @return Hex string.
+     */
     public static String bytesToHexString(byte b) {
         return bytesToHexString(b, false);
     }
 
+    /**
+     * Convert bytes to hex string.
+     * @param b Bytes.
+     * @param withSpace If true, add space between results.
+     * @return Hex string.
+     */
     public static String bytesToHexString(byte b, boolean withSpace) {
         byte[] bytes = new byte[1];
 
@@ -42,10 +61,12 @@ public class Utils {
         return bytesToHexString(bytes, withSpace);
     }
 
-    public static String bytesToHexString(byte[] bytes) {
-        return bytesToHexString(bytes, false);
-    }
-
+    /**
+     * Convert Bytes to Hex string.
+     * @param bytes Bytes.
+     * @param withSpace If true, add space between result.
+     * @return
+     */
     public static String bytesToHexString(byte[] bytes, boolean withSpace) {
         int mult = withSpace ? 3 : 2;
 
@@ -64,6 +85,11 @@ public class Utils {
         return new String(hexChars);
     }
 
+    /**
+     * Convert Hex to ASCII chars.
+     * @param hexString Hex string.
+     * @return ASCII string.
+     */
     public static String hexToString(String hexString) {
         StringBuilder output = new StringBuilder();
 
@@ -76,18 +102,12 @@ public class Utils {
 
         return output.toString();
     }
-    public static long getDate(String sDate, String sTime){
-        SimpleDateFormat ft =
-                new SimpleDateFormat("mm/dd/yy HH:mm:ss");
-        Date date = null;
-        try {
-            date = ft.parse(sDate+" "+sTime);
-        } catch (ParseException exception) {
-            Logger.e(TAG,exception.getStackTrace().toString());
-        }
-        return date.getTime();
-    }
 
+    /**
+     * Check if internet if available.
+     * @param context Activity context.
+     * @return True if internet available, false otherwise.
+     */
     public static boolean isInternetAvailable(Context context) {
         ConnectivityManager networkConnection = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = networkConnection.getActiveNetworkInfo();

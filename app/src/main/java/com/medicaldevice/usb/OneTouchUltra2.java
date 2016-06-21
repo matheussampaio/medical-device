@@ -32,6 +32,9 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/**
+ * OneTouchUltra2 commands implementations.
+ */
 @EBean
 public class OneTouchUltra2 extends Device {
 
@@ -58,10 +61,17 @@ public class OneTouchUltra2 extends Device {
     private String strLines = "";
     private int lines = 0;
 
+    /**
+     * OneTouchUltra2 Constructor.
+     * @param context Application context.
+     */
     public OneTouchUltra2(Context context) {
         super(context);
     }
 
+    /**
+     * Send DMP command to the device.
+     */
     public void sendDMPCommand() {
         Logger.d(TAG, "OneTouchUltra2::sendDMPCommand");
         arrayBytesReceived.clear();
@@ -71,36 +81,57 @@ public class OneTouchUltra2 extends Device {
         sendCommand(COMMAND_DMP, COMMAND_DMP_DATA);
     }
 
+    /**
+     * Send DMF command to the device.
+     */
     public void sendDMFCommand() {
         Logger.d(TAG, "OneTouchUltra2::sendDMFCommand");
         sendCommand(COMMAND_DMF, COMMAND_DMF_DATA);
     }
 
+    /**
+     * Send DMAT command to the device.
+     */
     public void sendDMATCommand() {
         Logger.d(TAG, "OneTouchUltra2::sendDMATCommand");
         sendCommand(COMMAND_DMAT, COMMAND_DMAT_DATA);
     }
 
+    /**
+     * Send DM? command to the device.
+     */
     public void sendDMQuestionCommand() {
         Logger.d(TAG, "OneTouchUltra2.sendDMQuestionCommand");
         sendCommand(COMMAND_DMQUESTION, COMMAND_DMQUESTION_DATA);
     }
 
+    /**
+     * Send DMS command to the device.
+     */
     public void sendDMSCommand() {
         Logger.d(TAG, "OneTouchUltra2::sendDMSCommand");
         sendCommand(COMMAND_DMS, COMMAND_DMS_DATA);
     }
 
+    /**
+     * Register EventBus.
+     */
     private void register() {
         Logger.d(TAG, "OneTouchUltra2::register");
         EventBus.getDefault().register(this);
     }
 
+    /**
+     * Unregister EventBus.
+     */
     private void unregister() {
         Logger.d(TAG, "OneTouchUltra2::unregister");
         EventBus.getDefault().unregister(this);
     }
 
+    /**
+     * Send data to the cloud if internet is available.
+     */
     public void sendEntriesToCloud() {
         Logger.d(TAG, "OneTouchUltra2::sendEntriesToCloud");
 
@@ -119,6 +150,10 @@ public class OneTouchUltra2 extends Device {
         }
     }
 
+    /**
+     * Listener for ByteReceivedEvent.
+     * @param event Event data.
+     */
     @Subscribe
     public void onByteReceivedEvent(ByteReceivedEvent event) {
         if (COMMAND_DMP.equalsIgnoreCase(lastCommand)) {
@@ -129,6 +164,11 @@ public class OneTouchUltra2 extends Device {
         }
     }
 
+    /**
+     * Send command to the device.
+     * @param command Command id.
+     * @param commandHexStringArray Command hex string array.
+     */
     private void sendCommand(String command, String[] commandHexStringArray) {
         Logger.d(TAG, "OneTouchUltra2::sendCommand");
 
@@ -147,6 +187,10 @@ public class OneTouchUltra2 extends Device {
         }
     }
 
+    /**
+     * Handler for DMP command.
+     * @param event
+     */
     private void handleCommandDMP(ByteReceivedEvent event) {
         arrayBytesReceived.add(event.getByte());
 
@@ -171,6 +215,11 @@ public class OneTouchUltra2 extends Device {
         }
     }
 
+    /**
+     * Parse data string to OTUData arraylist.
+     * @param data Data string.
+     * @return OTUData arraylist.
+     */
     private ArrayList<OTUData> parseData(String data) {
         Logger.d(TAG, "OneTouchUltra2::parseData");
         DateTimeFormatter formatter = DateTimeFormat.forPattern("mm/dd/yy HH:mm:ss");
@@ -225,6 +274,10 @@ public class OneTouchUltra2 extends Device {
         return deviceEntries;
     }
 
+    /**
+     * Save OTUData entries to the database.
+     * @param entries OTUData entries.
+     */
     private void saveNewEntriesToDatabase(List<OTUData> entries) {
         Logger.d(TAG, "OneTouchUltra2::saveNewEntriesToDatabase");
         List<OTUData> databaseEntries = OTUData.listAll(OTUData.class);
@@ -237,6 +290,10 @@ public class OneTouchUltra2 extends Device {
         }
     }
 
+    /**
+     * Send OTUData entry to cloud.
+     * @param entry OTUData object
+     */
     private void sendEntryToCloud(final OTUData entry) {
         Logger.d(TAG, "OneTouchUltra2::sendEntryToCloud");
         Call<OTUData> call = RESTful.getInstance().postOTUData(entry);

@@ -22,6 +22,9 @@ import org.androidannotations.api.support.app.AbstractIntentService;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+/**
+ * Service for device synchronization in background.
+ */
 @EIntentService
 public class DeviceHandlerService extends AbstractIntentService {
 
@@ -34,10 +37,17 @@ public class DeviceHandlerService extends AbstractIntentService {
     @SystemService
     NotificationManager mNotificationManager;
 
+    /**
+     * DeviceHandlerService Constructor.
+     */
     public DeviceHandlerService() {
         super("DeviceHandlerService");
     }
 
+    /**
+     * Start synchronization with device in background.
+     * @param device
+     */
     @ServiceAction
     void sync(UsbDevice device) {
         Logger.d("DeviceHandlerService::sync");
@@ -61,6 +71,10 @@ public class DeviceHandlerService extends AbstractIntentService {
         mOneTouchUltra2.init(device);
     }
 
+    /**
+     * Listener for InitEvent
+     * @param event Event data.
+     */
     @Subscribe
     void onInitEvent(InitEvent event) {
         Logger.d("DeviceHandlerService::onInitEvent: " + event.getResult());
@@ -73,12 +87,19 @@ public class DeviceHandlerService extends AbstractIntentService {
         }
     }
 
+    /**
+     * Listener for CommandEndEvent.
+     * @param event Event data.
+     */
     @Subscribe
     void onCommandEndEvent(CommandEndEvent event) {
         Logger.d("DeviceHandlerService::onCommandEndEvent: " + event.getCommand());
         stop();
     }
 
+    /**
+     * Close connection and stop service.
+     */
     private void stop() {
         Logger.d("DeviceHandlerService::stop");
 

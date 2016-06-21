@@ -20,14 +20,13 @@ import org.androidannotations.annotations.EBean;
 import org.greenrobot.eventbus.EventBus;
 
 
+/**
+ * Base class for connection with USB Devices
+ */
 @EBean
 public class Device {
-    /**
-     * Used this code as reference:
-     * https://github.com/wburgers/Z-Droid/blob/master/src/de/hallenbeck/indiserver/communication_drivers/PL2303driver.java
-     */
 
-    // USB control commands
+    // USB control constants
     private static final int SET_LINE_REQUEST_TYPE = 0x21;
     private static final int SET_LINE_REQUEST = 0x20;
     private static final int BREAK_REQUEST_TYPE = 0x21;
@@ -63,15 +62,30 @@ public class Device {
 
     protected boolean isInitialized = false;
 
+    /**
+     * Device constructor.
+     * @param context Application context.
+     */
     public Device(Context context) {
         mContext = context;
         mUsbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
     }
 
+    /**
+     * Initialize connection with the USB device.
+     * @param device connection target.
+     * @return true if success, false otherwise.
+     */
     public boolean init(UsbDevice device) {
         return init(device, false);
     }
 
+    /**
+     * Initialize connection with the USB device.
+     * @param device connection target.
+     * @param force if true, will bypass previous initialization and try again.
+     * @return true if success, false otherwise.
+     */
     public boolean init(UsbDevice device, boolean force) {
         Logger.d(TAG, "Device::init");
 
@@ -199,6 +213,9 @@ public class Device {
         return true;
     }
 
+    /**
+     * Close connection with device.
+     */
     public void close() {
         Logger.d(TAG, "Device::close");
 
@@ -212,6 +229,15 @@ public class Device {
         }
     }
 
+    /**
+     * Send data to the device.
+     * @param id Transfer id, util for debug.
+     * @param endpoint Interface endpoint.
+     * @param buffer Data buffer.
+     * @param length Buffer size.
+     * @param timeout Timeout.
+     * @return transfer result number, -1 if failed.
+     */
     private int sendBulkTransfer(int id, UsbEndpoint endpoint, byte[] buffer, int length, int timeout) {
         if (mConnection != null) {
             return mConnection.bulkTransfer(endpoint, buffer, length, timeout);
@@ -222,6 +248,18 @@ public class Device {
         return -1;
     }
 
+    /**
+     * Send control data to device.
+     * @param id Transfer id, util for debug.
+     * @param vendorReadRequestType Request identification constant.
+     * @param vendorReadRequest Read identification constant.
+     * @param value Value.
+     * @param index Index.
+     * @param buffer Data buffer.
+     * @param length Data buffer length.
+     * @param timeout Transfer timeout.
+     * @throws Exception If control transfer failed.
+     */
     private void sendControlTransfer(int id, int vendorReadRequestType, int vendorReadRequest, int value, int index, byte[] buffer, int length, int timeout) throws Exception {
         Logger.d(TAG, "Device::sendControlTransfer");
 
@@ -239,6 +277,9 @@ public class Device {
         }
     }
 
+    /**
+     * Read data from the device.
+     */
     @Background
     public void read() {
         Logger.d(TAG, "Device::read");
@@ -254,12 +295,20 @@ public class Device {
         }
     }
 
+    /**
+     * Send data to device.
+     * @param bytes Data array.
+     */
     @Background
     void sendBytes(byte[] bytes) {
         Logger.d(TAG, "Device::sendBytes");
         sendBulkTransfer(1, mEndpoint1, bytes, bytes != null ? bytes.length : 0, 100);
     }
 
+    /**
+     * If connection is initialized.
+     * @return True if initialized, false otherwise.
+     */
     public boolean isInitialized() {
         return isInitialized;
     }
